@@ -1,8 +1,9 @@
 var webdriverio = require('webdriverio');
 var mocha = require('wdio-mocha-framework');
 var assert = require('assert');
+var Test = require('./app/models/test');
 
-module.exports = function(flow) {
+module.exports = function(flow, testId) {
     var stepDelay = 0;
     var options = {
         desiredCapabilities: {
@@ -102,11 +103,33 @@ module.exports = function(flow) {
             return executeDynamicCommandsSequentially(commands);
         })
         .then(function(err){
+            updateDb("success", "complete", Date.now());
             //not called
         }, function(err) {
-            console.log(err.message);
-            //return this or something
+            updateDb("failed", "complete", Date.now(), err);
+            return err.message;
         })
-        .end();
+        .end(function(err){
+        })
 
+    function updateDb(result, status, finishDateTime, details) {
+        var query = {_id: testId};
+        var update = {
+            result: result,
+            status: status,
+            details: details,
+            finished: finishDateTime
+        }
+        Test.update(
+            query,
+            update,
+            function(err) {
+                if (err) {
+                    console.log("failed to update");
+                    console.log(err);
+                }
+                console.log("updated!");
+            }
+        )
+    }
 }

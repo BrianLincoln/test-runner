@@ -3,20 +3,20 @@ var Test = require('./models/test');
 
 module.exports = function(app) {
     app.post('/', function(req, res) {
-        console.log(req.body);
         var test = new Test({
             flowId: req.body.id,
-            start: Date.now()
+            start: Date.now(),
+            status: "running"
         });
+        
         test.save(function (error, test) {
             if (error) {
-                return error
+                res.send(error);
             }
             else {
-                console.log("saved test to db");
+                runTest(req.body, test.id);
+                res.send('hello from the other side');
             }
         });
-        runTest(req.body);
-        res.send('hello from the other side');
     });
 }
