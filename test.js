@@ -4,7 +4,7 @@ var assert = require('assert');
 var Test = require('./app/models/test');
 
 module.exports = function(flow, testId) {
-    var stepDelay = 0;
+    var stepDelay = 200;
     var options = {
         desiredCapabilities: {
             browserName: 'chrome'

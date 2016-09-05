@@ -5,8 +5,8 @@ var testSchema = mongoose.Schema({
     flowId: String,
     start: Date,
     finished: Date,
-    result: String,
-    details: String
+    status: String,
+    result: String
 });
 
 // create the model for users and expose it to our app
