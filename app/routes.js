@@ -8,13 +8,13 @@ module.exports = function(app) {
             start: Date.now(),
             status: "running"
         });
-        
+
         test.save(function (error, test) {
             if (error) {
                 res.send(error);
             }
             else {
-                runTest(req.body, test.id);
+                runTest(req.body.flow, test.id);
                 res.send('hello from the other side');
             }
         });

@@ -117,8 +117,8 @@ module.exports = function(flow, testId) {
         var update = {
             result: result,
             status: status,
-            details: details,
-            finished: finishDateTime
+            finished: finishDateTime,
+            flowId: flow.id
         }
         Test.update(
             query,
@@ -128,7 +128,9 @@ module.exports = function(flow, testId) {
                     console.log("failed to update");
                     console.log(err);
                 }
-                console.log("updated!");
+                else {
+                    console.log("updated!");
+                }
             }
         )
     }
