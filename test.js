@@ -7,7 +7,7 @@ module.exports = function(flow, testId) {
     var stepDelay = 200;
     var options = {
         desiredCapabilities: {
-            browserName: 'chrome'
+            browserName: 'firefox'
         }
     };
     var client = webdriverio.remote(options);
