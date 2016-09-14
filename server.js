@@ -14,6 +14,7 @@ mongoose.connect(configDB.url); // connect to our database
 app.use(morgan('dev')); // log every request to the console
 app.use(bodyParser()); // get information from html forms
 
+app.use(express.static('./public'));
 
 // routes ======================================================================
 require('./app/routes.js')(app); // load our routes and pass in our app

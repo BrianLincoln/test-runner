@@ -4,7 +4,7 @@ var assert = require('assert');
 var Test = require('./app/models/test');
 
 module.exports = function(flow, testId) {
-    var stepDelay = 200;
+    var stepDelay = 20;
     var options = {
         desiredCapabilities: {
             browserName: 'chrome'
@@ -26,6 +26,9 @@ module.exports = function(flow, testId) {
     }
 
     function dynamicCommand(step) {
+        console.log("flow");
+        console.log(flow);
+        console.log(step);
         switch (step.stepType) {
             case "pageLoad":
                 return this
@@ -35,6 +38,7 @@ module.exports = function(flow, testId) {
                   }, function(e) {
                       throw new Error("failed to load url");
                   })
+                  .saveScreenshot("public/screenshots/" + step._id + ".png")
                   .pause(stepDelay);
                 break;
             case "click":
@@ -51,6 +55,7 @@ module.exports = function(flow, testId) {
                     }, function(e) {
                         throw new Error("failed to click element");
                     })
+                    .saveScreenshot("public/screenshots/" + step._id + ".png")
                     .pause(stepDelay);
                 break;
             case "input":
@@ -67,6 +72,7 @@ module.exports = function(flow, testId) {
                     }, function(e) {
                         throw new Error("failed to set value");
                     })
+                    .saveScreenshot("public/screenshots/" + step._id + ".png")
                     .pause(stepDelay);
                 break;
 
@@ -78,6 +84,7 @@ module.exports = function(flow, testId) {
                     }, function(e) {
                         throw new Error("failed to find element");
                     })
+                    .saveScreenshot("public/screenshots/" + step._id + ".png")
                     .pause(stepDelay);
                 break;
         }
