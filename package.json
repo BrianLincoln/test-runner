@@ -12,6 +12,7 @@
     "body-parser": "~1.0.0",
     "chromedriver": "^2.23.1",
     "express": "^4.14.0",
+    "fluent-ffmpeg": "^2.1.0",
     "mongoose": "~3.8.1",
     "morgan": "~1.0.0",
     "webdriverio": "^4.2.8"

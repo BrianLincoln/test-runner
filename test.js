@@ -11,6 +11,7 @@ module.exports = function(flow, testId) {
         }
     };
     var client = webdriverio.remote(options);
+    var screeshotPath = "./public/screenshots/"
     client.addCommand('generateDynamicCommands',generateDynamicCommands.bind(client));
     client.addCommand('executeDynamicCommandsSequentially',executeDynamicCommandsSequentially.bind(client));
 
@@ -26,9 +27,6 @@ module.exports = function(flow, testId) {
     }
 
     function dynamicCommand(step) {
-        console.log("flow");
-        console.log(flow);
-        console.log(step);
         switch (step.stepType) {
             case "pageLoad":
                 return this
@@ -38,7 +36,7 @@ module.exports = function(flow, testId) {
                   }, function(e) {
                       throw new Error("failed to load url");
                   })
-                  .saveScreenshot("public/screenshots/" + step._id + ".png")
+                  .saveScreenshot(screeshotPath + step._id + ".png")
                   .pause(stepDelay);
                 break;
             case "click":
@@ -55,7 +53,7 @@ module.exports = function(flow, testId) {
                     }, function(e) {
                         throw new Error("failed to click element");
                     })
-                    .saveScreenshot("public/screenshots/" + step._id + ".png")
+                    .saveScreenshot(screeshotPath + step._id + ".png")
                     .pause(stepDelay);
                 break;
             case "input":
@@ -72,7 +70,7 @@ module.exports = function(flow, testId) {
                     }, function(e) {
                         throw new Error("failed to set value");
                     })
-                    .saveScreenshot("public/screenshots/" + step._id + ".png")
+                    .saveScreenshot(screeshotPath + step._id + ".png")
                     .pause(stepDelay);
                 break;
 
@@ -84,7 +82,7 @@ module.exports = function(flow, testId) {
                     }, function(e) {
                         throw new Error("failed to find element");
                     })
-                    .saveScreenshot("public/screenshots/" + step._id + ".png")
+                    .saveScreenshot(screeshotPath + step._id + ".png")
                     .pause(stepDelay);
                 break;
         }
