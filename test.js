@@ -32,8 +32,6 @@ module.exports = function(flow, testId) {
         if (failure)
             return;
 
-        console.log("dynamic command");
-        console.log(step);
         switch (step.stepType) {
             case "pageLoad":
                 return this
@@ -134,7 +132,6 @@ module.exports = function(flow, testId) {
             return executeDynamicCommandsSequentially(commands);
         })
         .then(function(err){
-            console.log("=================== 1");
             updateDb("success", "complete", Date.now());
         })
         .end(function(err){
