@@ -11,7 +11,9 @@ module.exports = function(flow, testId) {
         }
     };
     var client = webdriverio.remote(options);
-    var screeshotPath = "./public/screenshots/"
+    var screeshotPath = "./public/screenshots/";
+    var failure = undefined;
+
     client.addCommand('generateDynamicCommands',generateDynamicCommands.bind(client));
     client.addCommand('executeDynamicCommandsSequentially',executeDynamicCommandsSequentially.bind(client));
 
@@ -27,6 +29,11 @@ module.exports = function(flow, testId) {
     }
 
     function dynamicCommand(step) {
+        if (failure)
+            return;
+
+        console.log("dynamic command");
+        console.log(step);
         switch (step.stepType) {
             case "pageLoad":
                 return this
@@ -34,7 +41,10 @@ module.exports = function(flow, testId) {
                   .then(function(){
                       //not called
                   }, function(e) {
-                      throw new Error("failed to load url");
+                      failure = {
+                          stepId: step._id,
+                          reason: "failed to load url"
+                      }
                   })
                   .saveScreenshot(screeshotPath + step._id + ".png")
                   .pause(stepDelay);
@@ -43,15 +53,23 @@ module.exports = function(flow, testId) {
                 return this
                     .waitForVisible(step.selector)
                     .then(function(){
-                        //not called
+                        //found element
                     }, function(e) {
-                        throw new Error("failed to find element");
+                        //didn't find element
+                        failure = {
+                            stepId: step._id,
+                            reason: "failed to find element"
+                        }
                     })
                     .click(step.selector)
                     .then(function(){
-                        //not called
+                        //clicked element
                     }, function(e) {
-                        throw new Error("failed to click element");
+                        //counldn't click element
+                        failure = {
+                            stepId: step._id,
+                            reason: "failed to click element"
+                        }
                     })
                     .saveScreenshot(screeshotPath + step._id + ".png")
                     .pause(stepDelay);
@@ -62,13 +80,19 @@ module.exports = function(flow, testId) {
                     .then(function(){
                         //not called
                     }, function(e) {
-                        throw new Error("failed to find element");
+                        failure = {
+                            stepId: step._id,
+                            reason: "failed to find element"
+                        }
                     })
                     .setValue(step.selector, step.inputValue)
                     .then(function(){
                         //not called
                     }, function(e) {
-                        throw new Error("failed to set value");
+                        failure = {
+                            stepId: step._id,
+                            reason: "failed to set value"
+                        }
                     })
                     .saveScreenshot(screeshotPath + step._id + ".png")
                     .pause(stepDelay);
@@ -80,7 +104,10 @@ module.exports = function(flow, testId) {
                     .then(function(){
                         //not called
                     }, function(e) {
-                        throw new Error("failed to find element");
+                        failure = {
+                            stepId: step._id,
+                            reason: "failed to find element"
+                        }
                     })
                     .saveScreenshot(screeshotPath + step._id + ".png")
                     .pause(stepDelay);
@@ -96,7 +123,6 @@ module.exports = function(flow, testId) {
             .then(function(err){
                 //not called
             }, function(err) {
-                throw new Error(err.message);
             })
         });
         return result;
@@ -108,22 +134,20 @@ module.exports = function(flow, testId) {
             return executeDynamicCommandsSequentially(commands);
         })
         .then(function(err){
+            console.log("=================== 1");
             updateDb("success", "complete", Date.now());
-            //not called
-        }, function(err) {
-            updateDb("failed", "complete", Date.now(), err);
-            return err.message;
         })
         .end(function(err){
         })
 
-    function updateDb(result, status, finishDateTime, details) {
+    function updateDb() {
         var query = {_id: testId};
         var update = {
-            result: result,
-            status: status,
-            finished: finishDateTime,
-            flowId: flow.id
+            result: failure === undefined ? "success" : "failed",
+            status: "complete",
+            finished: Date.now(),
+            flowId: flow.id,
+            failure: failure
         }
         Test.update(
             query,

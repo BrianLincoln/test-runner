@@ -6,7 +6,11 @@ var testSchema = mongoose.Schema({
     start: Date,
     finished: Date,
     status: String,
-    result: String
+    result: String,
+    failure: {
+        stepId: String,
+        reason: String
+    }
 });
 
 // create the model for users and expose it to our app
