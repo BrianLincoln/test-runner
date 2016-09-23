@@ -39,10 +39,12 @@ module.exports = function(flow, testId) {
                   .then(function(){
                       //not called
                   }, function(e) {
-                      failure = {
-                          stepId: step._id,
-                          reason: "failed to load url"
-                      }
+                      failure = failure !== undefined
+                          ? failure
+                          : {
+                              stepId: step._id,
+                              reason: "failed to load url"
+                          }
                   })
                   .saveScreenshot(screeshotPath + step._id + ".png")
                   .pause(stepDelay);
@@ -54,20 +56,53 @@ module.exports = function(flow, testId) {
                         //found element
                     }, function(e) {
                         //didn't find element
-                        failure = {
-                            stepId: step._id,
-                            reason: "failed to find element"
-                        }
+                        failure = failure !== undefined
+                            ? failure
+                            : {
+                                stepId: step._id,
+                                reason: "failed to find element"
+                            }
                     })
                     .click(step.selector)
                     .then(function(){
                         //clicked element
                     }, function(e) {
                         //counldn't click element
-                        failure = {
-                            stepId: step._id,
-                            reason: "failed to click element"
-                        }
+                        failure = failure !== undefined
+                            ? failure
+                            : {
+                                stepId: step._id,
+                                reason: "failed to click element"
+                            }
+                    })
+                    .saveScreenshot(screeshotPath + step._id + ".png")
+                    .pause(stepDelay);
+                break;
+            case "hover":
+                return this
+                    .waitForVisible(step.selector)
+                    .then(function(){
+                        //found element
+                    }, function(e) {
+                        //didn't find element
+                        failure = failure !== undefined
+                            ? failure
+                            : {
+                                stepId: step._id,
+                                reason: "failed to find element"
+                            }
+                    })
+                    .moveToObject(step.selector)
+                    .then(function(){
+                        //clicked element
+                    }, function(e) {
+                        //counldn't click element
+                        failure = failure !== undefined
+                            ? failure
+                            : {
+                                stepId: step._id,
+                                reason: "failed to hover element"
+                            }
                     })
                     .saveScreenshot(screeshotPath + step._id + ".png")
                     .pause(stepDelay);
@@ -78,19 +113,25 @@ module.exports = function(flow, testId) {
                     .then(function(){
                         //not called
                     }, function(e) {
-                        failure = {
-                            stepId: step._id,
-                            reason: "failed to find element"
-                        }
+                        failure = failure !== undefined
+                            ? failure
+                            : {
+                                stepId: step._id,
+                                reason: "failed to find element"
+                            }
                     })
                     .setValue(step.selector, step.inputValue)
                     .then(function(){
                         //not called
                     }, function(e) {
-                        failure = {
-                            stepId: step._id,
-                            reason: "failed to set value"
-                        }
+                        console.log(failure);
+
+                        failure = failure !== undefined
+                            ? failure
+                            : {
+                                stepId: step._id,
+                                reason: "failed to set value"
+                            }
                     })
                     .saveScreenshot(screeshotPath + step._id + ".png")
                     .pause(stepDelay);
@@ -102,10 +143,12 @@ module.exports = function(flow, testId) {
                     .then(function(){
                         //not called
                     }, function(e) {
-                        failure = {
-                            stepId: step._id,
-                            reason: "failed to find element"
-                        }
+                        failure = failure !== undefined
+                            ? failure
+                            : {
+                                stepId: step._id,
+                                reason: "failed to find element"
+                            }
                     })
                     .saveScreenshot(screeshotPath + step._id + ".png")
                     .pause(stepDelay);
