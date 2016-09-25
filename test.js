@@ -18,7 +18,6 @@ module.exports = function(flow, testId) {
     client.addCommand('generateDynamicCommands',generateDynamicCommands.bind(client));
     client.addCommand('executeDynamicCommandsSequentially',executeDynamicCommandsSequentially.bind(client));
 
-
     function generateDynamicCommands(steps) {
         var promiseFactories = [];
         for( var i = 0; i < steps.length; i++) {
@@ -48,9 +47,7 @@ module.exports = function(flow, testId) {
                           }
                   })
                   .then(function(screenshot) {
-                      var fileName = flow.id + "/" + step._id + ".png";
-                      saveImageToS3(screenshot, fileName);
-                      screenshots.push(fileName);
+                      handleScreenShot(screenshot, step._id);
                   })
                   .pause(stepDelay);
                 break;
@@ -79,9 +76,7 @@ module.exports = function(flow, testId) {
                             }
                     })
                     .then(function(screenshot) {
-                        var fileName = flow.id + "/" + step._id + ".png";
-                        saveImageToS3(screenshot, fileName);
-                        screenshots.push(fileName);
+                        handleScreenShot(screenshot, step._id);
                     })
                     .pause(stepDelay);
                 break;
@@ -110,9 +105,7 @@ module.exports = function(flow, testId) {
                             }
                     })
                     .then(function(screenshot) {
-                        var fileName = flow.id + "/" + step._id + ".png";
-                        saveImageToS3(screenshot, fileName);
-                        screenshots.push(fileName);
+                        handleScreenShot(screenshot, step._id);
                     })
                     .pause(stepDelay);
                 break;
@@ -139,9 +132,7 @@ module.exports = function(flow, testId) {
                             }
                     })
                     .then(function(screenshot) {
-                        var fileName = flow.id + "/" + step._id + ".png";
-                        saveImageToS3(screenshot, fileName);
-                        screenshots.push(fileName);
+                        handleScreenShot(screenshot, step._id);
                     })
                     .pause(stepDelay);
                 break;
@@ -160,9 +151,7 @@ module.exports = function(flow, testId) {
                             }
                     })
                     .then(function(screenshot) {
-                        var fileName = flow.id + "/" + step._id + ".png";
-                        saveImageToS3(screenshot, fileName);
-                        screenshots.push(fileName);
+                        handleScreenShot(screenshot, step._id);
                     })
                     .pause(stepDelay);
                 break;
@@ -179,6 +168,17 @@ module.exports = function(flow, testId) {
         return result;
     }
 
+    function handleScreenShot(screenshot, stepId) {
+        var fileName = flow.id + "/" + stepId + ".png";
+        var screenShotMetaData = {
+            "stepId": stepId,
+            "fileName": fileName
+        };
+        
+        saveImageToS3(screenshot, fileName);
+        screenshots.push(screenShotMetaData);
+    }
+
     client.init()
         .generateDynamicCommands(flow.steps)
         .then(function(commands){
@@ -191,6 +191,7 @@ module.exports = function(flow, testId) {
         })
 
     function updateDb() {
+        console.log(screenshots);
         var query = {_id: testId};
         var update = {
             result: failure === undefined ? "success" : "failed",
