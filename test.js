@@ -2,6 +2,7 @@ var webdriverio = require('webdriverio');
 var mocha = require('wdio-mocha-framework');
 var assert = require('assert');
 var Test = require('./app/models/test');
+var saveImageToS3 = require('./upload-screenshot');
 
 module.exports = function(flow, testId) {
     var stepDelay = 20;
@@ -11,8 +12,8 @@ module.exports = function(flow, testId) {
         }
     };
     var client = webdriverio.remote(options);
-    var screeshotPath = "./public/screenshots/";
     var failure = undefined;
+    var screenshots = [];
 
     client.addCommand('generateDynamicCommands',generateDynamicCommands.bind(client));
     client.addCommand('executeDynamicCommandsSequentially',executeDynamicCommandsSequentially.bind(client));
@@ -37,7 +38,7 @@ module.exports = function(flow, testId) {
                 return this
                   .url(step.url)
                   .then(function(){
-                      //not called
+                      return client.saveScreenshot();
                   }, function(e) {
                       failure = failure !== undefined
                           ? failure
@@ -46,15 +47,17 @@ module.exports = function(flow, testId) {
                               reason: "failed to load url"
                           }
                   })
-                  .saveScreenshot(screeshotPath + step._id + ".png")
+                  .then(function(screenshot) {
+                      var fileName = flow.id + "/" + step._id + ".png";
+                      saveImageToS3(screenshot, fileName);
+                      screenshots.push(fileName);
+                  })
                   .pause(stepDelay);
                 break;
             case "click":
                 return this
                     .waitForVisible(step.selector)
-                    .then(function(){
-                        //found element
-                    }, function(e) {
+                    .then(function(){}, function(e) {
                         //didn't find element
                         failure = failure !== undefined
                             ? failure
@@ -65,7 +68,7 @@ module.exports = function(flow, testId) {
                     })
                     .click(step.selector)
                     .then(function(){
-                        //clicked element
+                        return client.saveScreenshot();
                     }, function(e) {
                         //counldn't click element
                         failure = failure !== undefined
@@ -75,15 +78,17 @@ module.exports = function(flow, testId) {
                                 reason: "failed to click element"
                             }
                     })
-                    .saveScreenshot(screeshotPath + step._id + ".png")
+                    .then(function(screenshot) {
+                        var fileName = flow.id + "/" + step._id + ".png";
+                        saveImageToS3(screenshot, fileName);
+                        screenshots.push(fileName);
+                    })
                     .pause(stepDelay);
                 break;
             case "hover":
                 return this
                     .waitForVisible(step.selector)
-                    .then(function(){
-                        //found element
-                    }, function(e) {
+                    .then(function(){}, function(e) {
                         //didn't find element
                         failure = failure !== undefined
                             ? failure
@@ -94,7 +99,7 @@ module.exports = function(flow, testId) {
                     })
                     .moveToObject(step.selector)
                     .then(function(){
-                        //clicked element
+                        return client.saveScreenshot();
                     }, function(e) {
                         //counldn't click element
                         failure = failure !== undefined
@@ -104,15 +109,17 @@ module.exports = function(flow, testId) {
                                 reason: "failed to hover element"
                             }
                     })
-                    .saveScreenshot(screeshotPath + step._id + ".png")
+                    .then(function(screenshot) {
+                        var fileName = flow.id + "/" + step._id + ".png";
+                        saveImageToS3(screenshot, fileName);
+                        screenshots.push(fileName);
+                    })
                     .pause(stepDelay);
                 break;
             case "input":
                 return this
                     .waitForVisible(step.selector)
-                    .then(function(){
-                        //not called
-                    }, function(e) {
+                    .then(function(){}, function(e) {
                         failure = failure !== undefined
                             ? failure
                             : {
@@ -122,10 +129,8 @@ module.exports = function(flow, testId) {
                     })
                     .setValue(step.selector, step.inputValue)
                     .then(function(){
-                        //not called
+                        return client.saveScreenshot();
                     }, function(e) {
-                        console.log(failure);
-
                         failure = failure !== undefined
                             ? failure
                             : {
@@ -133,7 +138,11 @@ module.exports = function(flow, testId) {
                                 reason: "failed to set value"
                             }
                     })
-                    .saveScreenshot(screeshotPath + step._id + ".png")
+                    .then(function(screenshot) {
+                        var fileName = flow.id + "/" + step._id + ".png";
+                        saveImageToS3(screenshot, fileName);
+                        screenshots.push(fileName);
+                    })
                     .pause(stepDelay);
                 break;
 
@@ -141,7 +150,7 @@ module.exports = function(flow, testId) {
                 return this
                     .waitForVisible(step.selector)
                     .then(function(){
-                        //not called
+                        return client.saveScreenshot();
                     }, function(e) {
                         failure = failure !== undefined
                             ? failure
@@ -150,7 +159,11 @@ module.exports = function(flow, testId) {
                                 reason: "failed to find element"
                             }
                     })
-                    .saveScreenshot(screeshotPath + step._id + ".png")
+                    .then(function(screenshot) {
+                        var fileName = flow.id + "/" + step._id + ".png";
+                        saveImageToS3(screenshot, fileName);
+                        screenshots.push(fileName);
+                    })
                     .pause(stepDelay);
                 break;
         }
@@ -161,10 +174,7 @@ module.exports = function(flow, testId) {
 
         commands.forEach(function (command, index) {
             result = result.then(command)
-            .then(function(err){
-                //not called
-            }, function(err) {
-            })
+            .then(function(err){}, function(err) {})
         });
         return result;
     }
@@ -187,6 +197,7 @@ module.exports = function(flow, testId) {
             status: "complete",
             finished: Date.now(),
             flowId: flow.id,
+            screenshots: screenshots,
             failure: failure
         }
         Test.update(
