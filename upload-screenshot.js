@@ -10,7 +10,8 @@ module.exports = function(image, fileName) {
     s3bucket.createBucket(function() {
       var params = {
           Key: fileName,
-          Body: image
+          Body: image,
+          ContentType: 'image/png'
       };
       s3bucket.upload(params, function(err, data) {
         if (err) {

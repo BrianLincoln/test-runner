@@ -3,6 +3,7 @@ var mocha = require('wdio-mocha-framework');
 var assert = require('assert');
 var Test = require('./app/models/test');
 var saveImageToS3 = require('./upload-screenshot');
+var config = require('./config/config.js');
 
 module.exports = function(flow, testId) {
     var stepDelay = 20;
@@ -169,12 +170,13 @@ module.exports = function(flow, testId) {
     }
 
     function handleScreenShot(screenshot, stepId) {
-        var fileName = flow.id + "/" + stepId + ".png";
+        var fileName = "screenshots/" + flow.id + "/" + stepId + ".png";
         var screenShotMetaData = {
             "stepId": stepId,
-            "fileName": fileName
+            "fileName": fileName,
+            "fullURL": config.screenshotBasePath + "/" + fileName
         };
-        
+
         saveImageToS3(screenshot, fileName);
         screenshots.push(screenShotMetaData);
     }
