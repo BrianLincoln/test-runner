@@ -21,6 +21,7 @@ module.exports = function(flow, testId) {
 
     function generateDynamicCommands(steps) {
         var promiseFactories = [];
+
         for( var i = 0; i < steps.length; i++) {
             var step = steps[i];
             var command = dynamicCommand.bind(this, step);
@@ -193,7 +194,6 @@ module.exports = function(flow, testId) {
         })
 
     function updateDb() {
-        console.log(screenshots);
         var query = {_id: testId};
         var update = {
             result: failure === undefined ? "success" : "failed",

@@ -6,6 +6,10 @@ AWS.config.secretAccessKey = config.AWSAsecretAccessKey;
 AWS.config.region = config.AWSAregion;
 
 module.exports = function(image, fileName) {
+    if (!image) {
+        console.log("no image");
+        return;
+    }
     var s3bucket = new AWS.S3({params: {Bucket: 'qa-test-runner'}});
     s3bucket.createBucket(function() {
       var params = {
