@@ -12,15 +12,13 @@ module.exports = function(app) {
                 console.log(err);
             }
         });
-        console.log("~~~~");
-        console.log(req.body);
 
         var test = new Test({
             flowId: req.body.flow.id,
             start: Date.now(),
             status: "running"
         });
-        console.log(test);
+        
         test.save(function (error, test) {
             if (error) {
                 res.send(error);
